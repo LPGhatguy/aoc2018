@@ -3,11 +3,11 @@ use std::collections::HashSet;
 static INPUT: &str = include_str!("../input.txt");
 
 fn part_one() {
-    let result = INPUT
+    let result: i32 = INPUT
         .split("\n")
         .map(str::trim_right)
         .map(|v| v.parse::<i32>().unwrap())
-        .fold(0i32, |a, b| a + b);
+        .sum();
 
     println!("part one: {:?}", result);
 }
