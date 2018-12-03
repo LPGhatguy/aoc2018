@@ -28,51 +28,38 @@ fn parse_claim(input: &str) -> Claim {
     }
 }
 
-fn part_one() {
+fn main() {
     let claims: Vec<_> = INPUT.lines().map(parse_claim).collect();
 
     let mut occupancy: HashMap<(u32, u32), (u32, u32)> = HashMap::new();
 
-    for claim in &claims {
-        for x in claim.position.0..(claim.position.0 + claim.size.0) {
-            for y in claim.position.1..(claim.position.1 + claim.size.1) {
-                if let Some((id, claims)) = occupancy.get(&(x, y)) {
-                    occupancy.insert((x, y), (*id, claims + 1));
+    for Claim { position, size, id } in &claims {
+        for x in position.0..(position.0 + size.0) {
+            for y in position.1..(position.1 + size.1) {
+                if let Some((existing_id, claims)) = occupancy.get(&(x, y)) {
+                    occupancy.insert((x, y), (*existing_id, claims + 1));
                 } else {
-                    occupancy.insert((x, y), (claim.id, 1));
+                    occupancy.insert((x, y), (*id, 1));
                 }
             }
         }
     }
 
-    'outer: for claim in &claims {
-        for x in claim.position.0..(claim.position.0 + claim.size.0) {
-            for y in claim.position.1..(claim.position.1 + claim.size.1) {
-                if let Some((id, claims)) = occupancy.get(&(x, y)) {
-                    if *id != claim.id || *claims != 1 {
+    'outer: for Claim { position, size, id } in &claims {
+        for x in position.0..(position.0 + size.0) {
+            for y in position.1..(position.1 + size.1) {
+                if let Some((existing_id, claims)) = occupancy.get(&(x, y)) {
+                    if *existing_id != *id || *claims != 1 {
                         continue 'outer;
                     }
                 }
             }
         }
 
-        println!("Part two: {}", claim.id);
+        println!("Part two: {}", id);
     }
 
-    let mut count = 0;
-    for (_, claims) in occupancy.values() {
-        if *claims >= 2 {
-            count += 1;
-        }
-    }
+    let count = occupancy.values().filter(|(_, v)| *v > 1).count();
 
-    println!("{}", count);
-}
-
-fn part_two() {
-}
-
-fn main() {
-    part_one();
-    part_two();
+    println!("Part one: {}", count);
 }
