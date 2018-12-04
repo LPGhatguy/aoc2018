@@ -1,9 +1,8 @@
-use std::cmp::Ordering;
 use std::collections::HashMap;
 
 static INPUT: &str = include_str!("../input.txt");
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy)]
 struct Time {
     month: u16,
     day: u16,
@@ -11,14 +10,14 @@ struct Time {
     minute: u16,
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug)]
 enum RowKind {
     FallAsleep,
     WakeUp,
     Begin(u32),
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug)]
 struct Row {
     time: Time,
     kind: RowKind,
@@ -42,7 +41,7 @@ fn parse_row(input: &str) -> Row {
             RowKind::Begin(remaining[..end].parse().unwrap())
         },
         v => {
-            panic!("ahh {}", v as char);
+            panic!("this isn't happening, right? {}", v as char);
         },
     };
 
@@ -57,11 +56,12 @@ struct SleepInfo {
     per_minute: [u16; 60],
 }
 
-fn part_one() {
-    let mut rows: Vec<_> = INPUT.lines().map(parse_row).collect();
+fn main() {
+    // assumes rows are already sorted; used "sort lines" (f9) in Sublime Text
+    let rows: Vec<_> = INPUT.lines().map(parse_row).collect();
 
-    let mut sleep_time = HashMap::new();
-    let mut guard = None;
+    let mut sleep_info_per_guard = HashMap::new();
+    let mut mutating_guard = None;
 
     let mut iter = rows.iter();
 
@@ -73,27 +73,24 @@ fn part_one() {
 
         match row.kind {
             RowKind::Begin(id) => {
-                guard = Some(id);
+                mutating_guard = Some(id);
             },
             RowKind::FallAsleep => {
-                let id = guard.unwrap();
+                let id = mutating_guard.unwrap();
                 let asleep = row.time;
                 let awake = iter.next().unwrap();
 
-                println!("asleep: {:?}", row);
-                println!("awake: {:?}", awake);
-
                 let time = awake.time.minute - asleep.minute;
 
-                let sleep_info = match sleep_time.get_mut(&id) {
+                let sleep_info = match sleep_info_per_guard.get_mut(&id) {
                     Some(v) => v,
                     None => {
                         let info = SleepInfo {
                             total: 0,
                             per_minute: [0; 60],
                         };
-                        sleep_time.insert(id, info);
-                        sleep_time.get_mut(&id).unwrap()
+                        sleep_info_per_guard.insert(id, info);
+                        sleep_info_per_guard.get_mut(&id).unwrap()
                     },
                 };
 
@@ -102,28 +99,39 @@ fn part_one() {
                     sleep_info.per_minute[i as usize] += 1;
                 }
             },
-            _ => unimplemented!()
+            _ => panic!("that row ain't right"),
         }
     }
 
-    let mut times = sleep_time.iter().collect::<Vec<_>>();
+    let mut times = sleep_info_per_guard.iter().collect::<Vec<_>>();
     times.sort_by_key(|v| v.1.total);
 
     let mut highest_value = 0;
     let mut highest_key = 0;
 
-    for (i, v) in (&times[times.len() - 1].1.per_minute[..]).iter().enumerate() {
-        if *v > highest_value {
-            highest_key = i;
-            highest_value = *v;
+    let most_sleepy_guard = times[times.len() - 1];
+    for (minute, asleep_time) in (&most_sleepy_guard.1.per_minute[..]).iter().enumerate() {
+        if *asleep_time > highest_value {
+            highest_key = minute;
+            highest_value = *asleep_time;
         }
     }
 
-    println!("minute {}", highest_key as u32 * *times[times.len() - 1].0);
-    // println!("{}", times[times.len() - 1].1.total);
-    // println!("{:?}", times);
-}
+    println!("part one: {}", highest_key as u32 * most_sleepy_guard.0);
 
-fn main() {
-    part_one();
+    let mut highest_guard = 0;
+    let mut highest_value = 0;
+    let mut highest_key = 0;
+
+    for (id, sleep_info) in &times {
+        for (i, v) in (&sleep_info.per_minute[..]).iter().enumerate() {
+            if *v > highest_value {
+                highest_guard = **id;
+                highest_key = i;
+                highest_value = *v;
+            }
+        }
+    }
+
+    println!("part two: {}", highest_guard as usize * highest_key);
 }
