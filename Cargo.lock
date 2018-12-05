@@ -12,12 +12,28 @@ version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "day-01"
+version = "0.1.0"
+
+[[package]]
+name = "day-02"
+version = "0.1.0"
+
+[[package]]
 name = "day-03"
 version = "0.1.0"
 dependencies = [
  "lazy_static 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "regex 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
+
+[[package]]
+name = "day-04"
+version = "0.1.0"
+
+[[package]]
+name = "day-05"
+version = "0.1.0"
 
 [[package]]
 name = "lazy_static"
