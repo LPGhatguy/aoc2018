@@ -12,10 +12,7 @@ fn react(input: &mut String) {
         let b = input.as_bytes()[index + 1];
 
         if should_react(a, b) {
-            let mut remove_start = index;
-            let mut remove_end = index + 1;
-
-            input.replace_range(remove_start..=remove_end, "");
+            input.replace_range(index..=(index + 1), "");
 
             if index > 0 {
                 index -= 1;
@@ -35,6 +32,21 @@ fn main() {
     react(&mut input);
 
     println!("Part one: {} units", input.len());
+
+    let mut lowest_length = INPUT.len();
+
+    for first_byte in b'A'..b'Z' {
+        let second_byte = first_byte + 32;
+
+        let mut test_input = INPUT.replace(first_byte as char, "").replace(second_byte as char, "");
+        react(&mut test_input);
+
+        if test_input.len() < lowest_length {
+            lowest_length = test_input.len();
+        }
+    }
+
+    println!("Part two: {}", lowest_length);
 }
 
 #[test]
