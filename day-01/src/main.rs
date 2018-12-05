@@ -4,7 +4,7 @@ static INPUT: &str = include_str!("../input.txt");
 
 fn part_one() {
     let result: i32 = INPUT
-        .split("\n")
+        .lines()
         .map(str::trim_right)
         .map(|v| v.parse::<i32>().unwrap())
         .sum();
@@ -14,7 +14,7 @@ fn part_one() {
 
 fn part_two() {
     let changes = INPUT
-        .split("\n")
+        .lines()
         .map(str::trim_right)
         .map(|v| v.parse::<i32>().unwrap())
         .cycle();
