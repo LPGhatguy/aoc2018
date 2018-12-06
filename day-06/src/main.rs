@@ -111,8 +111,23 @@ fn main() {
 
     println!("part one: {}", max_area);
 
-    // println!("Area of 0 is {}", get_area(&mines, 0));
+    let ((min_x, min_y), (max_x, max_y)) = get_bounding_box(&mines);
+    let mut area = 0;
 
-    // println!("{:?}", closest_mine((202, 254), &mines));
-    // println!("{} are eligable, out of {}", eligable.len(), mines.len());
+    for x in (min_x - 200)..=(max_x + 200) {
+        'inner: for y in (min_y - 200)..=(max_y + 200) {
+            let mut sum = 0;
+            for mine in &mines {
+                sum += manhatten((x, y), *mine);
+
+                if sum >= 10_000 {
+                    continue 'inner;
+                }
+            }
+
+            area += 1;
+        }
+    }
+
+    println!("part two: {}", area);
 }
