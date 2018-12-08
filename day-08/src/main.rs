@@ -3,6 +3,7 @@ static INPUT: &str = include_str!("../input.txt");
 struct Node {
 	children: Vec<Node>,
 	metadata: Vec<u32>,
+	value: u32,
 }
 
 fn parse_node<T: Iterator<Item = u32>>(input: &mut T, sum: &mut u32) -> Node {
@@ -13,7 +14,8 @@ fn parse_node<T: Iterator<Item = u32>>(input: &mut T, sum: &mut u32) -> Node {
 	let mut metadata = Vec::new();
 
 	for _ in 0..num_children {
-		children.push(parse_node(input, sum));
+		let child = parse_node(input, sum);
+		children.push(child);
 	}
 
 	for _ in 0..num_metadata {
@@ -22,7 +24,19 @@ fn parse_node<T: Iterator<Item = u32>>(input: &mut T, sum: &mut u32) -> Node {
 		metadata.push(meta);
 	}
 
-	Node { children, metadata }
+	let value = if children.is_empty() {
+		metadata.iter().sum()
+	} else {
+		let mut value = 0;
+		for meta in &metadata {
+			if let Some(child) = children.get(*meta as usize - 1) {
+				value += child.value;
+			}
+		}
+		value
+	};
+
+	Node { children, metadata, value }
 }
 
 fn main() {
@@ -33,6 +47,8 @@ fn main() {
 		.collect();
 
 	let mut sum = 0;
-	parse_node(&mut numbers.iter().cloned(), &mut sum);
-    println!("Hello, world! {:?}", sum);
+	let root = parse_node(&mut numbers.iter().cloned(), &mut sum);
+
+    println!("Part one: {:?}", sum);
+    println!("Part two: {}", root.value);
 }
