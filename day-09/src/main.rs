@@ -8,12 +8,14 @@ struct Node {
 fn play_game(player_count: usize, last_marble_value: usize) -> usize {
 	let mut player_scores = vec![0; player_count];
 	let mut active_player = 0;
-	let mut marbles = vec![Node {
+	let mut current_marble = 0;
+	let mut marbles = Vec::new();
+	marbles.reserve_exact(last_marble_value);
+	marbles.push(Node {
 		prev: 0,
 		next: 0,
 		value: 0,
-	}];
-	let mut current_marble = 0;
+	});
 
 	for marble in 1..=last_marble_value {
 		if marble % 23 == 0 {
