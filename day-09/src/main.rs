@@ -1,9 +1,3 @@
-static INPUT: &str = include_str!("../input.txt");
-
-fn modulo(a: isize, b: isize) -> usize {
-	((a % b + b) % b) as usize
-}
-
 #[derive(Debug)]
 struct Node {
 	prev: usize,
@@ -11,10 +5,7 @@ struct Node {
 	value: usize,
 }
 
-fn main() {
-	let player_count = 411;
-	let last_marble_value = 72059 * 100;
-
+fn play_game(player_count: usize, last_marble_value: usize) -> usize {
 	let mut player_scores = vec![0; player_count];
 	let mut active_player = 0;
 	let mut marbles = vec![Node {
@@ -34,23 +25,24 @@ fn main() {
 			}
 
 			let Node { value, prev, next } = marbles[remove_index as usize];
-
 			marbles[prev].next = next;
 			marbles[next].prev = prev;
 
 			player_scores[active_player] += value;
 			current_marble = next;
 
+			// For diagnostics:
 			// println!("Player {} got {} and {}", active_player, marble, value);
 		} else {
 			let insert_after = marbles[current_marble].next;
 			let insert_before = marbles[insert_after].next;
-			let new_node = Node {
+			let new_marble = Node {
 				prev: insert_after,
 				next: insert_before,
 				value: marble,
 			};
-			marbles.push(new_node);
+
+			marbles.push(new_marble);
 			marbles[insert_after].next = marbles.len() - 1;
 			marbles[insert_before].prev = marbles.len() - 1;
 
@@ -58,10 +50,13 @@ fn main() {
 		}
 
 		active_player = (active_player + 1) % player_count;
-		// println!("{}: {:?}", current_marble, marbles);
 	}
 
-	// println!("{:?}", player_scores);
 	player_scores.sort();
-	println!("{}", player_scores[player_scores.len() - 1]);
+	player_scores[player_scores.len() - 1]
+}
+
+fn main() {
+	println!("Part one: {}", play_game(411, 72059));
+	println!("Part two: {}", play_game(411, 72059 * 100));
 }
