@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Clone, Copy)]
 struct Node {
 	prev: usize,
 	next: usize,
@@ -24,29 +24,30 @@ fn play_game(player_count: usize, last_marble_value: usize) -> usize {
 				remove_index = marbles[remove_index].prev;
 			}
 
-			let Node { value, prev, next } = marbles[remove_index as usize];
-			marbles[prev].next = next;
-			marbles[next].prev = prev;
+			let removed_marble = marbles[remove_index as usize];
+			marbles[removed_marble.prev].next = removed_marble.next;
+			marbles[removed_marble.next].prev = removed_marble.prev;
 
-			player_scores[active_player] += value;
-			current_marble = next;
+			player_scores[active_player] += removed_marble.value;
+			current_marble = removed_marble.next;
 
 			// For diagnostics:
 			// println!("Player {} got {} and {}", active_player, marble, value);
 		} else {
 			let insert_after = marbles[current_marble].next;
 			let insert_before = marbles[insert_after].next;
-			let new_marble = Node {
+
+			let new_marble_index = marbles.len();
+			marbles.push(Node {
 				prev: insert_after,
 				next: insert_before,
 				value: marble,
-			};
+			});
 
-			marbles.push(new_marble);
-			marbles[insert_after].next = marbles.len() - 1;
-			marbles[insert_before].prev = marbles.len() - 1;
+			marbles[insert_after].next = new_marble_index;
+			marbles[insert_before].prev = new_marble_index;
 
-			current_marble = marbles.len() - 1;
+			current_marble = new_marble_index;
 		}
 
 		active_player = (active_player + 1) % player_count;
